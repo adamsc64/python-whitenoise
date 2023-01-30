@@ -61,6 +61,7 @@ def play_noise():
         while (not stop) or (datetime.datetime.utcnow() < stop):
             end_time = time.time() + CYCLE_SECONDS
             while end_time > time.time():
+                time.sleep(.01)  # Prevents process from taking 100% CPU!
                 while select.select([sys.stdin.fileno()], [], [], 0.0)[0]:
                     command = os.read(sys.stdin.fileno(), 4096)
                     command = command.decode().strip()
