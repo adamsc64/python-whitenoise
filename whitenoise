@@ -1,4 +1,11 @@
 #!/Users/chris/virtualenvs/env3/bin/python3
+"""
+Plays white noise while running.
+
+Installation:
+$ pip install simpleaudio pydub
+"""
+
 import argparse
 import datetime
 import time
