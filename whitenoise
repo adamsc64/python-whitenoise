@@ -3,7 +3,7 @@
 Plays white noise while running.
 
 Installation:
-$ pip install simpleaudio pydub
+$ pip install simpleaudio pydub click
 """
 
 import argparse
@@ -16,6 +16,7 @@ import sys
 from pydub import AudioSegment
 from simpleaudio._simpleaudio import SimpleaudioError
 import simpleaudio
+import click
 
 
 AUDIOFILE = "media/white_noise_10_seconds.wav"
@@ -44,18 +45,21 @@ def play(seg):
             time.sleep(1)
 
 
-def main():
+@click.command()
+@click.option("--minutes", default=None, help="for how many minutes")
+@click.option("--volume", default=0, help="volume modification +/-")
+def main(minutes, volume):
+    "Play white noise to default audio output device."
     print_prompt()
-    return play_noise()
+    return play_noise(minutes=minutes, volume=volume)
 
 
 def print_prompt():
     print(PROMPT.strip())
 
 
-def play_noise():
+def play_noise(minutes, volume):
     start = datetime.datetime.utcnow()
-    minutes, volume = args.minutes, args.volume
     if minutes:
         minutes = int(minutes)
         stop = start + datetime.timedelta(minutes=minutes)
@@ -68,7 +72,7 @@ def play_noise():
         while (not stop) or (datetime.datetime.utcnow() < stop):
             end_time = time.time() + CYCLE_SECONDS
             while end_time > time.time():
-                time.sleep(.01)  # Prevents process from taking 100% CPU!
+                time.sleep(0.01)  # Prevents process from taking 100% CPU!
                 while select.select([sys.stdin.fileno()], [], [], 0.0)[0]:
                     command = os.read(sys.stdin.fileno(), 4096)
                     command = command.decode().strip()
@@ -96,22 +100,4 @@ def get_audio_filename():
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Play white noise to default audio output device."
-    )
-    parser.add_argument(
-        "--minutes",
-        type=int,
-        default=None,
-        required=False,
-        help=("for how many minutes"),
-    )
-    parser.add_argument(
-        "--volume",
-        type=int,
-        default=0,
-        required=False,
-        help=("volume modification +/-"),
-    )
-    args = parser.parse_args()
     main()
