@@ -46,30 +46,31 @@ def play(seg):
 
 
 @click.command()
-@click.option("--minutes", default=None, help="for how many minutes")
-@click.option("--volume", default=0, help="volume modification +/-")
-def main(minutes, volume):
+@click.option("-t", "--timeout", default=None, help="for how many minutes")
+@click.option("-v", "--volume", default=0, help="volume modification +/-")
+def main(timeout, volume):
     "Play white noise to default audio output device."
     print_prompt()
-    return play_noise(minutes=minutes, volume=volume)
+    if timeout:
+        timeout = int(timeout) * 60
+    return play_noise(volume=volume, seconds=timeout)
 
 
 def print_prompt():
     print(PROMPT.strip())
 
 
-def play_noise(minutes, volume):
-    start = datetime.datetime.utcnow()
-    if minutes:
-        minutes = int(minutes)
-        stop = start + datetime.timedelta(minutes=minutes)
+def play_noise(volume, seconds=None):
+    start = datetime.datetime.now(datetime.timezone.utc)
+    if seconds:
+        stop = start + datetime.timedelta(seconds=seconds)
     else:
         stop = None
     noise = AudioSegment.from_mp3(get_audio_filename())
     noise += DEFAULT_VOLUME_OFFSET + volume
     try:
         playback = play(noise)  # nonblocking
-        while (not stop) or (datetime.datetime.utcnow() < stop):
+        while (not stop) or (datetime.datetime.now(datetime.timezone.utc) <= stop):
             end_time = time.time() + CYCLE_SECONDS
             while end_time > time.time():
                 time.sleep(0.01)  # Prevents process from taking 100% CPU!
