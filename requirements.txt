@@ -1,3 +1,4 @@
+audioop-lts==0.2.1
 click==8.1.7
 pydub==0.25.0
 simpleaudio==1.0.4
